@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html> 
+<head> 
+  <title>TEST</title> 
+
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCFurkQGHSnjw3BCiQHPeyPHPLv5XF16gw" type="text/javascript"></script> 
+  <script src="three/three.min.js"></script>
+  <script src="hyperlapse/GSVPano.js"></script> 
+  <script src="hyperlapse/Hyperlapse.js"></script>
+  <link rel="stylesheet" type="text/css" href="styles/maps-canvas.css">
+  <script> 
+    function init() {
+      var hyperlapse = new Hyperlapse(document.getElementById('pano'), {
+        lookat: new google.maps.LatLng(33.9424244,-118.407506),
+        zoom: 2,
+        use_lookat: false,
+        elevation: 10
+      });
+      // var hyperlapse2 = new Hyperlapse(document.getElementById('pano2'), {
+      //   lookat: new google.maps.LatLng(39.9503025,-75.2037831),
+      //   zoom: 2,
+      //   use_lookat: false,
+      //   elevation: 10
+      // });
+
+      hyperlapse.onError = function(e) {
+        console.log(e);
+      };
+      hyperlapse.onRouteComplete = function(e) {
+        hyperlapse.load();
+      };
+      hyperlapse.onLoadComplete = function(e) {
+        hyperlapse.play();
+      };
+
+      // hyperlapse.onPause = function(e) {
+
+      //   document.getElementById('pano').style.display = "none";
+      //   document.getElementById('pano2').style.display = "block";
+
+
+      //   directions_service.route(route.request, function(response, status) {
+      //     if (status == google.maps.DirectionsStatus.OK) {
+      //       hyperlapse2.generate( {route:response} );
+      //     } else {
+      //       console.log(status);
+      //     }
+      //   });
+
+
+      // };
+      // hyperlapse2.onError = function(e) {
+      //   console.log(e);
+      // };
+      // hyperlapse2.onRouteComplete = function(e) {
+      //   hyperlapse2.load();
+      // };
+      // hyperlapse2.onLoadComplete = function(e) {
+      //   hyperlapse2.play();
+      // };
+
+      // Google Maps API stuff here...
+      var directions_service = new google.maps.DirectionsService();
+      var route = {
+        request:{
+          origin: new google.maps.LatLng(33.9424244,-118.407506),
+          destination: new google.maps.LatLng(34.0135208,-118.4923075),
+          travelMode: google.maps.DirectionsTravelMode.DRIVING
+        }
+      };
+      directions_service.route(route.request, function(response, status) {
+        if (status == google.maps.DirectionsStatus.OK) {
+          hyperlapse.generate( {route:response} );
+        } else {
+          console.log(status);
+        }
+      });
+    }
+    window.onload = init;
+
+  </script> 
+</head> 
+<body> 
+  <div id="pano"></div>
+</body> 
+</html>

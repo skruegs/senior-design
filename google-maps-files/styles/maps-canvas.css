@@ -1,0 +1,23 @@
+
+
+#pano {
+  margin: auto;
+  display: none;
+  background-color: #000;
+  width: 100%;
+  height: 100%;
+}
+
+#pano canvas {
+  width:100% !important;
+  height: 100% !important;
+  margin: auto !important;
+  position: absolute !important;
+  z-index:1;
+}
+
+img {
+  position: absolute !important;
+  width: 100%;
+  z-index:2;
+}

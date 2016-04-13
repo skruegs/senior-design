@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>earth</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  </head>
+  <body>
+
+    <div id="container">
+      <div id="input">
+        <h3>Let's take a trip</h3>
+        <div id="search-bars">
+          <form>
+            from:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to:<br>
+            <input type="text" name="from-input">&nbsp;
+            <input type="text" name="to-input">
+          </form>
+        </div>
+        <div>
+          <br><button id="start-button" onClick="onStartButton()">Start</button>
+        </div>
+    </div>
+
+    <div id="pano">
+      <img src="images/car-window-transparent-3.png">
+    </div>
+
+
+
+    <script src="three/three.min.js"></script>
+
+    <script src="three/Projector.js"></script>
+    <script src="three/SoftwareRenderer.js"></script>
+    <script src="three/stats.min.js"></script>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCFurkQGHSnjw3BCiQHPeyPHPLv5XF16gw" type="text/javascript"></script> 
+    <script src="hyperlapse/GSVPano.js"></script> 
+    <script src="hyperlapse/Hyperlapse.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="styles/main.css">
+    <link rel="stylesheet" type="text/css" href="styles/maps-canvas.css">
+
+
+    <script>
+
+      var container;//, stats;
+      var camera, scene, renderer;
+      var group;
+      var mouseX = 0, mouseY = 0;
+
+      var windowHalfX = window.innerWidth / 2;
+      var windowHalfY = window.innerHeight / 2;
+
+      init();
+      animate();
+
+      function init() {
+
+        container = document.getElementById( 'container' );
+
+        camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 2000 );
+        camera.position.z = 500;
+
+        scene = new THREE.Scene();
+
+        group = new THREE.Group();
+        scene.add( group );
+
+        // earth
+
+        var loader = new THREE.TextureLoader();
+        loader.load( 'textures/night-texture.jpg', function ( texture ) {
+
+          var geometry = new THREE.SphereGeometry( 300, 30, 30 );
+
+          var material = new THREE.MeshLambertMaterial( { map: texture, overdraw: 0.5 } );
+          var mesh = new THREE.Mesh( geometry, material );
+          group.add( mesh );
+
+        } );
+
+        var canvas = document.createElement( 'canvas' );
+        canvas.width = 128;
+        canvas.height = 128;
+
+        var context = canvas.getContext( '2d' );
+        var gradient = context.createRadialGradient(
+          canvas.width / 2,
+          canvas.height / 2,
+          0,
+          canvas.width / 2,
+          canvas.height / 2,
+          canvas.width / 2
+        );
+        gradient.addColorStop( 0.1, 'rgba(210,210,210,1)' );
+        gradient.addColorStop( 1, 'rgba(255,255,255,1)' );
+
+        context.fillStyle = gradient;
+        context.fillRect( 0, 0, canvas.width, canvas.height );
+
+        var texture = new THREE.CanvasTexture( canvas );
+
+        var geometry = new THREE.PlaneBufferGeometry( 300, 300, 3, 3 );
+        var material = new THREE.MeshBasicMaterial( { map: texture, overdraw: 0.5 } );
+
+        var mesh = new THREE.Mesh( geometry, material );
+        mesh.position.y = - 250;
+        mesh.rotation.x = - Math.PI / 2;
+        group.add( mesh );
+
+        renderer = new THREE.SoftwareRenderer();
+        renderer.setClearColor( 0x000000 );
+
+        renderer.setSize( window.innerWidth, window.innerHeight );
+
+        container.appendChild( renderer.domElement );
+
+        // stats = new Stats();
+        // stats.domElement.style.position = 'absolute';
+        // stats.domElement.style.top = '0px';
+        // container.appendChild( stats.domElement );
+
+        document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+
+        window.addEventListener( 'resize', onWindowResize, false );
+
+
+        // START HYPERLAPSE CODE HERE
+        var hyperlapse = new Hyperlapse(document.getElementById('pano'), {
+          lookat: new google.maps.LatLng(39.9506573,-75.2030897),
+          zoom: 2,
+          use_lookat: false,
+          elevation: 10
+        });
+
+        var playing = false;
+
+        document.getElementById('pano').onclick = function () {
+          console.log('here');
+          if (playing) {
+            hyperlapse.pause();
+          } else {
+            hyperlapse.play();
+          }
+        };
+
+        hyperlapse.onError = function(e) {
+          console.log(e);
+        };
+        hyperlapse.onRouteComplete = function(e) {
+          hyperlapse.load();
+        };
+        hyperlapse.onLoadComplete = function(e) {
+          //hyperlapse.play();
+          //playing = true;
+          setHyperlapse(hyperlapse);
+        };
+        
+        var directions_service = new google.maps.DirectionsService();
+        var route = {
+          request:{
+            origin: new google.maps.LatLng(39.9506573,-75.2030897),
+            destination: new google.maps.LatLng(39.9504409,-75.2013271),
+            travelMode: google.maps.DirectionsTravelMode.DRIVING
+          }
+        };
+        directions_service.route(route.request, function(response, status) {
+          if (status == google.maps.DirectionsStatus.OK) {
+            hyperlapse.generate( {route:response} );
+          } else {
+            console.log(status);
+          }
+        });
+      }
+      //window.onload = init;
+      
+
+      function onWindowResize() {
+
+        windowHalfX = window.innerWidth / 2;
+        windowHalfY = window.innerHeight / 2;
+
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize( window.innerWidth, window.innerHeight );
+
+      }
+
+      function onDocumentMouseMove( event ) {
+
+        mouseX = ( event.clientX - windowHalfX );
+        mouseY = ( event.clientY - windowHalfY );
+
+      }
+
+
+      function animate() {
+
+        requestAnimationFrame( animate );
+
+        render();
+        //stats.update();
+
+      }
+
+      function render() {
+
+        camera.position.x += ( mouseX - camera.position.x ) * 0.03;
+        camera.position.y += ( - mouseY - camera.position.y ) * 0.03;
+        camera.lookAt( scene.position );
+
+        group.rotation.y -= 0.005;
+
+        renderer.render( scene, camera );
+
+      }
+
+      function onStartButton() {
+
+        hl = getHyperlapse();
+        print(h1);
+        if (hl) {
+          document.getElementById('container').style.display = "none";
+          document.getElementById('pano').style.display = "block";
+          setTimeout( getHyperlapse().play(), 2000 );  
+        }
+      }
+
+      var hyperlapse;
+      function setHyperlapse(h) {
+        hyperlapse = h;
+      }
+      function getHyperlapse() {
+        return hyperlapse;
+      }
+
+
+    </script>
+
+  </body>
+</html>

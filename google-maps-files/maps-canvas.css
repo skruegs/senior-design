@@ -1,0 +1,18 @@
+html, body, #pano {
+  width:100%;
+  height: 100%;
+  background-color: #000;
+}
+
+#pano {
+  margin: auto;
+}
+
+canvas {
+  width:1000px !important;
+  height: 500px !important;
+  margin: auto !important;
+  position: absolute !important;
+  left: 50% !important;
+  margin-left: -500px !important;
+}
