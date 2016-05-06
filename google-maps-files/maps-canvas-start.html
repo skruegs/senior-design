@@ -7,14 +7,14 @@
   <script src="three/three.min.js"></script>
   <script src="hyperlapse/GSVPano.js"></script> 
   <script src="hyperlapse/Hyperlapse.js"></script>
-  <link rel="stylesheet" type="text/css" href="styles/maps-canvas.css">
+  <link rel="stylesheet" type="text/css" href="styles/tests.css">
   <script> 
     function init() {
       var hyperlapse = new Hyperlapse(document.getElementById('pano'), {
-        lookat: new google.maps.LatLng(37.81409525128964,-122.4775045005249),
-        zoom: 1,
-        use_lookat: true,
-        elevation: 50
+        lookat: new google.maps.LatLng(39.9506231,-75.2028167),
+        zoom: 3,
+        use_lookat: false,
+        elevation: 10
       });
       hyperlapse.onError = function(e) {
         console.log(e);
@@ -28,8 +28,8 @@
       var directions_service = new google.maps.DirectionsService();
       var route = {
         request:{
-          origin: new google.maps.LatLng(37.816480000000006,-122.47825,37),
-          destination: new google.maps.LatLng(37.81195,-122.47773000000001),
+          origin: new google.maps.LatLng(39.9506231,-75.2028167),
+          destination: new google.maps.LatLng(39.9501473,-75.2012259),
           travelMode: google.maps.DirectionsTravelMode.DRIVING
         }
       };

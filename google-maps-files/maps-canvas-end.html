@@ -6,12 +6,12 @@
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCFurkQGHSnjw3BCiQHPeyPHPLv5XF16gw" type="text/javascript"></script> 
   <script src="three/three.min.js"></script>
   <script src="hyperlapse/GSVPano.js"></script> 
-  <script src="hyperlapse/Hyperlapse.js"></script>
-  <link rel="stylesheet" type="text/css" href="styles/maps-canvas.css">
+  <script src="hSyperlapse/Hyperlapse.js"></script>
+  <link rel="stylesheet" type="text/css" href="styles/tests.css">
   <script> 
     function init() {
       var hyperlapse = new Hyperlapse(document.getElementById('pano'), {
-        lookat: new google.maps.LatLng(33.9424244,-118.407506),
+        lookat: new google.maps.LatLng(36.8763335,-111.5009173),
         zoom: 2,
         use_lookat: false,
         elevation: 10
@@ -63,8 +63,8 @@
       var directions_service = new google.maps.DirectionsService();
       var route = {
         request:{
-          origin: new google.maps.LatLng(33.9424244,-118.407506),
-          destination: new google.maps.LatLng(34.0135208,-118.4923075),
+          origin: new google.maps.LatLng(36.8763335,-111.5009173),
+          destination: new google.maps.LatLng(36.8917132,-111.4919517),
           travelMode: google.maps.DirectionsTravelMode.DRIVING
         }
       };

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Custom Trip</title>
+  <link rel="stylesheet" type="text/css" href="custom-route.css">
+  <link href='https://fonts.googleapis.com/css?family=Roboto:400,300' rel='stylesheet' type='text/css'>
+  <script src="jquery.min.js"></script>
+  <script type="text/javascript" src="custom-route.js"></script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCFurkQGHSnjw3BCiQHPeyPHPLv5XF16gw&callback=initialize&libraries=geometry,places"></script>
+</head>
+<body>
+  <div id="left-panel">
+  <h1><a href="javascript:window.location.reload(true)">Custom Route</a></h1>
+  <input id="input-from" placeholder="Enter starting point..." type="text"></input>
+  <input id="input-to" placeholder="Enter destination..." type="text"></input>
+  <center><button id="enter" onclick="geocode()">Begin</button></center>
+
+  <div id="map-view"></div>
+    <div id="controls">
+      <p>Speed</p>
+      <form id="speed-form">
+        <input type="radio" name="speed" id="speed" value="1" checked>
+        <input type="radio" name="speed" id="speed" value="0.5">
+        <input type="radio" name="speed" id="speed" value="0.33">
+        <input type="radio" name="speed" id="speed" value="0.25">
+        <input type="radio" name="speed" id="speed" value="0.2">
+      </form>
+      <div id="speed-options">
+        <span id="speed-label">1x</span>
+        <span id="speed-label">2x</span>
+        <span id="speed-label">3x</span>
+        <span id="speed-label">4x</span>
+        <span id="speed-label">5x</span>
+      </div>
+      <br>
+      <button id="play-pause" onclick="startAnimation()">
+        <span class="play-pause-text">Play</span>
+      </button>
+    </div>
+
+  </div>
+  
+  <div id="right-panel">
+    <div id="street-view"></div>
+  </div>
+</body>
+</html>

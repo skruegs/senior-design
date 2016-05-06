@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>earth</title>
+    <title>SD</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
   </head>
@@ -20,6 +20,7 @@
         <div>
           <br><button id="start-button" onClick="onStartButton()">Start</button>
         </div>
+      </div>
     </div>
 
     <div id="pano">
@@ -44,7 +45,7 @@
 
     <script>
 
-      var container;//, stats;
+      var container;
       var camera, scene, renderer;
       var group;
       var mouseX = 0, mouseY = 0;
@@ -116,10 +117,7 @@
 
         container.appendChild( renderer.domElement );
 
-        // stats = new Stats();
-        // stats.domElement.style.position = 'absolute';
-        // stats.domElement.style.top = '0px';
-        // container.appendChild( stats.domElement );
+        // get rid of shadow??
 
         document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 
@@ -128,7 +126,7 @@
 
         // START HYPERLAPSE CODE HERE
         var hyperlapse = new Hyperlapse(document.getElementById('pano'), {
-          lookat: new google.maps.LatLng(39.9506573,-75.2030897),
+          lookat: new google.maps.LatLng(39.9506398,-75.20295),
           zoom: 2,
           use_lookat: false,
           elevation: 10
@@ -160,8 +158,8 @@
         var directions_service = new google.maps.DirectionsService();
         var route = {
           request:{
-            origin: new google.maps.LatLng(39.9506573,-75.2030897),
-            destination: new google.maps.LatLng(39.9504409,-75.2013271),
+            origin: new google.maps.LatLng(39.9506398,-75.20295),
+            destination: new google.maps.LatLng(39.9504543,-75.2014513),
             travelMode: google.maps.DirectionsTravelMode.DRIVING
           }
         };
@@ -219,21 +217,21 @@
 
       function onStartButton() {
 
-        hl = getHyperlapse();
-        print(h1);
-        if (hl) {
+        var h = getHyperlapse();
+        console.log(h);
+        if (h) {
           document.getElementById('container').style.display = "none";
           document.getElementById('pano').style.display = "block";
           setTimeout( getHyperlapse().play(), 2000 );  
         }
       }
 
-      var hyperlapse;
+      var hl = null;
       function setHyperlapse(h) {
-        hyperlapse = h;
+        hl = h;
       }
       function getHyperlapse() {
-        return hyperlapse;
+        return hl;
       }
 
 
