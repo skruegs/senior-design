@@ -2,20 +2,25 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Custom Trip</title>
-  <link rel="stylesheet" type="text/css" href="custom-route.css">
+  <title>Sample Trips</title>
+  <link rel="stylesheet" type="text/css" href="sample-trips.css">
   <link href='https://fonts.googleapis.com/css?family=Roboto:400,300' rel='stylesheet' type='text/css'>
   <script src="../jquery.min.js"></script>
   <link rel="icon" href="../assets/fav-icon.png">
-  <script type="text/javascript" src="custom-route.js"></script>
+  <script type="text/javascript" src="sample-trips.js"></script>
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCFurkQGHSnjw3BCiQHPeyPHPLv5XF16gw&callback=initialize&libraries=geometry,places"></script>
 </head>
 <body>
   <div id="left-panel">
-  <h1><a href="javascript:window.location.reload(true)">Custom Route</a></h1>
-  <input id="input-from" placeholder="Enter starting point..." type="text"></input>
-  <input id="input-to" placeholder="Enter destination..." type="text"></input>
-  <center><button id="enter" onclick="geocode()">Begin</button></center>
+  <h1><a href="javascript:window.location.reload(true)">Sample Trips</a></h1>
+  <form id="trip-form">
+    <input type="radio" name="trip" id="trip" value="ny"> New York, NY<br>
+    <input type="radio" name="trip" id="trip" value="pa"> Philadelphia, PA<br>
+    <input type="radio" name="trip" id="trip" value="ca"> San Diego, CA
+  </form>
+  <center><div id="trip_name"></div>
+  <button id="enter" onclick="configureEndpoints()">Begin</button>
+  </center>
 
   <div id="map-view"></div>
     <div id="controls">
@@ -38,10 +43,10 @@
         <span id="speed-label">4x&ensp;&nbsp;</span>
       </div>
       <br>
+      <button id="export" onclick="exportData()">Export Points of Interest</button>
     </div>
-
   </div>
-  
+
   <div id="right-panel">
     <div id="street-view"></div>
   </div>

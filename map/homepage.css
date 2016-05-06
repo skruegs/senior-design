@@ -1,0 +1,57 @@
+html, body {
+  font-family: Roboto;
+  font-size: 12px;
+  background-color: #222;
+  color: #222;
+  font-weight: 300;
+  overflow:hidden;
+}
+
+#container {
+  text-align: center;
+  padding-top: 20px;
+}
+
+table{
+  text-align: center;
+  margin: 0 auto;
+}
+
+td {
+  padding: 0 20px;
+  vertical-align: top;
+}
+
+#logo {
+  max-width: 25%;
+}
+
+#lines {
+  width: 25px;
+}
+
+#link {
+  width: 150px;
+  margin-top: 50px;
+  border: 1px dashed #FFF;
+  border-radius: 1px;
+}
+
+h1 {
+  margin: 8px 0 10px 4px;
+  font-weight: 300;
+  font-size: 14px;
+}
+
+a {
+  text-decoration: none;
+  color: #FFF;
+}
+
+a:hover {
+  color: #f9d800;
+}
+
+a:focus {
+  color: #cfb400;
+}

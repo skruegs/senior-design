@@ -3,6 +3,16 @@
  *  Last updated: May 6, 2016
  */
 
+// Pine
+// var start = {lat: 39.954891, lng: -75.236791};
+// var end = {lat: 39.950507, lng: -75.201420};
+// Spruce
+// var start = {lat: 39.950338, lng: -75.1939347};
+// var end = {lat: 39.952943, lng: -75.2147607};
+// KC SL
+// var start = {lat:39.099912, lng:-94.581213};
+// var end = {lat:38.627089, lng:-90.200203};
+
 // content vars
 var panorama;
 var map;
@@ -19,7 +29,7 @@ var heading;
 var pitch = 1;
 
 // UI var defaults
-var baseSpeed = 600;
+var baseSpeed = 400;
 var speed = baseSpeed;
 var rampedSpeed = false;
 var isPaused = false;
@@ -28,50 +38,37 @@ var isPaused = false;
 function initialize() {
   $('input[type=radio][name=speed]').change(function() {
     if (this.value === 'ramp') {
-      speed = baseSpeed;
       rampedSpeed = true;
     } else {
-      speed = 300 * this.value;
+      speed = baseSpeed * this.value;
       rampedSpeed = false;
     }
   });
-  startBox = new google.maps.places.Autocomplete($('#input-from').get(0), {
-    types: ['geocode']
-  });
-  endBox = new google.maps.places.Autocomplete($('#input-to').get(0), {
-    types: ['geocode']
-  });
 }
 
-function geocode () {
-  var geocoder = new google.maps.Geocoder();
-  geocoder.geocode( {'address': $('#input-from').get(0).value}, function(results, status) {
-    if (status === google.maps.GeocoderStatus.OK) {
-      var source = results[0].geometry.location;
-      start = {lat: source.lat(), lng: source.lng()};
-      geocoder.geocode( {'address': $('#input-to').get(0).value}, function(results, status) {
-        if (status === google.maps.GeocoderStatus.OK) {
-          var dest = results[0].geometry.location;
-          end = {lat: dest.lat(), lng: dest.lng()};
+function configureEndpoints () {
+  var trip = $('input[name=trip]:checked').val();
+  if (trip === 'ca') {
+    start = {lat: 40.7964834, lng: -73.9495098};
+    end = {lat: 40.7673764, lng: -73.970684};
+    $('#trip_name').html('<p>Malibu, CA</p>');
 
-          start = {lat:34.0410805, lng:-118.8915323};
-          end = {lat: 34.021144, lng:-118.8289902};
-          // successfully got start and end: populate UI
-          $('#input-from').prop('disabled',true);
-          $('#input-to').prop('disabled',true);
-          $('#enter').css('display', 'none');
-          $('#left-panel').css('height', '500px');
-          $('#controls').css('display', 'block');
-          $('#right-panel').css('display', 'block');
-          load();
-        } else {
-          alert("Geocode was not successful for the following reason: " + status);
-        }
-      });
-    } else {
-      alert("Geocode was not successful for the following reason: " + status);
-    }
-  });
+  } else if (trip === 'ny') {
+    start = {lat: 40.7916895, lng: -73.9530089};
+    end = {lat: 40.7728354, lng: -73.966765};
+    $('#trip_name').html('<p>New York, NY</p>');
+
+  } else if (trip === 'pa') {
+    start = {lat: 39.9518619, lng: -75.1425758};
+    end = {lat: 39.9543991, lng: -75.1723673};
+    $('#trip_name').html('<p>Philadelphia, PA</p>');
+  }
+  $('#trip-form').css('display', 'none');
+  $('#enter').css('display', 'none');
+  $('#left-panel').css('height', '500px');
+  $('#controls').css('display', 'block');
+  $('#right-panel').css('display', 'block');
+  load();
 }
 
 function load () {
@@ -100,6 +97,7 @@ function load () {
       mapTypeControl: false
     });
 
+
   // set up path
   var directionsService = new google.maps.DirectionsService;
   var directionsDisplay = new google.maps.DirectionsRenderer({
@@ -111,67 +109,81 @@ function load () {
     travelMode: google.maps.TravelMode.DRIVING
   }, function(response, status) {
       if (status === google.maps.DirectionsStatus.OK) {
-      var legs = response.routes[0].legs;
-      for (i = 0; i < legs.length; i++) {
-        var steps = legs[i].steps;
-        for (j = 0; j < steps.length; j++) {
-          var path = steps[j].path;
-          for (k = 0; k < path.length; k++) {
-            // coord
-            routeCoordinates.push({
-              lat: path[k].lat(), 
-              lng: path[k].lng()
-            });
-            // heading
-            var rc_len = routeCoordinates.length;
-            if (rc_len > 1) {
-              var h = calculateHeading(routeCoordinates[rc_len - 2],
-                                       routeCoordinates[rc_len - 1]);
-              var prev_h = routeHeadings[routeHeadings.length - 1] || heading;
-              // console.log(Math.abs(h - prev_h));
-              if (Math.abs(h - prev_h) > 30 && Math.abs(h - prev_h) < 95) {
-                routeHeadings.push(h);
-              } else if (rc_len === 2) {
-                routeHeadings.push(h);
-              } else {
-                routeHeadings.push(prev_h);
+        var legs = response.routes[0].legs;
+        for (i = 0; i < legs.length; i++) {
+          var steps = legs[i].steps;
+          for (j = 0; j < steps.length; j++) {
+            var path = steps[j].path;
+            for (k = 0; k < path.length; k++) {
+ 
+              // heading
+              var rc_len = routeCoordinates.length;
+              if (rc_len > 1) {
+                var h = calculateHeading(routeCoordinates[rc_len - 2],
+                                         routeCoordinates[rc_len - 1]);
+                var prev_h = routeHeadings[routeHeadings.length - 1] || heading;
+                if (Math.abs(h - prev_h) > 40 && Math.abs(h - prev_h) < 100) {
+                  routeHeadings.push(h);
+                } else if (rc_len === 2) {
+                  routeHeadings.push(h);
+                } else {
+                  routeHeadings.push(prev_h);
+                }
               }
+
+              // add midpoint
+              if (rc_len > 1) {
+                var lat3 = (routeCoordinates[rc_len - 1].lat + path[k].lat())/2;
+                var lng3 = (routeCoordinates[rc_len - 1].lng + path[k].lng())/2;
+                routeCoordinates.push({lat: lat3, lng: lng3});
+                routeHeadings.push(routeHeadings[routeHeadings.length - 1]);
+              }
+              // coord
+              routeCoordinates.push({
+                lat: path[k].lat(), 
+                lng: path[k].lng()
+              });
+
             }
           }
         }
-      }
-      // routeCoordinates = response.routes[0].overview_path;
-      // for (var i = 0; i < routeCoordinates.length; i++) {
-      //   var coord = routeCoordinates[i];
-      //   if (i > 0) {
-      //     var h = calculateHeading(routeCoordinates[i - 1],
-      //                              routeCoordinates[i]);
-      //     var prev_h = routeHeadings[i - 1] || heading;
-      //     if (Math.abs(h - prev_h) > 40 && Math.abs(h - prev_h) < 100) {
-      //       routeHeadings.push(h);
-      //     } else if (i === 1) {
-      //       routeHeadings.push(h);
-      //     } else {
-      //       routeHeadings.push(prev_h);
-      //     }
-      //   }
-      // }
-      heading = routeHeadings[0];
-      routeHeadings.push(routeHeadings[routeHeadings.length - 1]);
-      // speed Markers
-      var index = Math.floor(routeCoordinates.length / 7.0);
-      for (var i = 1; i < 7; i++) {
-        speedMarkers.push(i * index);
-      }
-      speedMarkers = [25, 40, 50, 100, 125, 138]; // DELETE THIS!!!!!!!
-      routeCoordinates[47] = routeCoordinates[48];
-      // draw line
-      directionsDisplay.setDirections(response);
-    } else {
+        heading = routeHeadings[0];
+        routeHeadings.push(routeHeadings[routeHeadings.length - 1]);
+        // speed Markers
+        var index = Math.floor(routeCoordinates.length / 7.0);
+        for (var i = 1; i < 7; i++) {
+          speedMarkers.push(i * index);
+        }
+
+        // 16: Guggenheim
+        // 25: The Met
+        // 32: Central Park
+        routeCoordinates[63] = routeCoordinates[64]; // replace weird one
+        var guggMarker = new google.maps.Marker({
+            position: {lat: 40.78303, lng: -73.9592825},
+            map: panorama,
+            icon: '../assets/guggenheim.png',
+            title: 'The Guggenheim'
+        });
+        var metMarker = new google.maps.Marker({
+            position: {lat: 40.778839,lng:-73.963031},
+            map: panorama,
+            icon: '../assets/met.png',
+            title: 'The Met'
+        });
+        var cpMarker = new google.maps.Marker({
+            position: {lat: 40.776409, lng:-73.9647285},
+            map: panorama,
+            icon: '../assets/centralpark.png',
+            title: 'Central Park'
+        });
+
+        // draw line
+        directionsDisplay.setDirections(response);
+      } else {
       window.alert('Directions request failed due to ' + status);
     }
   });
-
 }
 
 
@@ -184,7 +196,6 @@ function calculateHeading (c1, c2) {
   }
   return h;
 }
-
 
 function startAnimation () {
   // change play/pause routing
@@ -214,7 +225,7 @@ function startAnimation () {
 
 function initialPanorama () {
   var currHeading = heading;
-  var stepSize = 0.4;
+  var stepSize = 4;
 
   var startPanoInterval = setInterval(function() {
     if (!isPaused) {
@@ -259,13 +270,25 @@ function advanceRoute() {
           setNewRouteSpeed(baseSpeed * 0.5);
         } else if (currIndex === speedMarkers[1] || 
                    currIndex === speedMarkers[3]) {
-          setNewRouteSpeed(baseSpeed * 0.35);
+          setNewRouteSpeed(baseSpeed * 0.33);
         } else if (currIndex === speedMarkers[2]) {
           setNewRouteSpeed(baseSpeed * 0.25); 
         } else if (currIndex === speedMarkers[5]) {
           setNewRouteSpeed(baseSpeed); 
-        }
+        } 
       }
+      // pause at POIS
+      if (currIndex === 31) {
+        isPaused = true;
+        setTimeout(playLeftPan(currIndex), 100);
+      } else if (currIndex === 49) {
+        isPaused = true;
+        setTimeout(playRightPan(currIndex), 100);
+      } else if (currIndex === 63) {
+        isPaused = true;
+        setTimeout(playRightPan(currIndex), 100);
+      }
+      console.log(currIndex);
       panorama.setPosition(routeCoordinates[currIndex]);
       panorama.setPov({
         heading: routeHeadings[currIndex],
@@ -283,6 +306,51 @@ function advanceRoute() {
   });
 
 }
+
+function playLeftPan(currIndex) {
+  var currHeading = routeHeadings[currIndex];
+  var stepSize = -0.3;
+
+  var interval = setInterval(function() {
+    currHeading += stepSize;
+    console.log(currHeading);
+    if (currHeading <= 150) {
+      stepSize = -stepSize;
+    }
+    if (currHeading > routeHeadings[currIndex]) {
+      clearInterval(interval);
+      isPaused = false;
+    }
+    panorama.setPov({
+      heading: currHeading,
+      pitch: pitch
+    });
+  }, 5);
+}
+
+function playRightPan (currIndex) {
+  var currHeading = routeHeadings[currIndex];
+  var stepSize = 0.3;
+
+  var interval = setInterval(function() {
+    currHeading += stepSize;
+    console.log(currHeading);
+    if (currHeading >= 270) {
+      stepSize = -stepSize;
+    }
+    if (currHeading < routeHeadings[currIndex]) {
+      clearInterval(interval);
+      isPaused = false;
+    }
+    panorama.setPov({
+      heading: currHeading,
+      pitch: pitch
+    });
+  }, 5);
+
+}
+
+
 
 function finalPanorama () {
   var finalHeading = routeHeadings[routeHeadings.length - 1];
@@ -321,3 +389,6 @@ function pausePlayAnimation () {
   }
 }
 
+function exportData () {
+  window.open('/sample-trips/exported-data/nyc.txt');
+} 
