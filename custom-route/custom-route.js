@@ -1,4 +1,4 @@
-/*
+/**
  *  Sarah Krueger
  *  Last updated: May 6, 2016
  */
@@ -25,6 +25,9 @@ var rampedSpeed = false;
 var isPaused = false;
 
 
+/**
+ *  Initializes event handlers and text inputs.
+ */
 function initialize() {
   $('input[type=radio][name=speed]').change(function() {
     if (this.value === 'ramp') {
@@ -43,6 +46,11 @@ function initialize() {
   });
 }
 
+
+/**
+ *  Geocodes input addresses into lat/long components.
+ *  Loads the full UI on success.
+ */
 function geocode () {
   var geocoder = new google.maps.Geocoder();
   geocoder.geocode( {'address': $('#input-from').get(0).value}, function(results, status) {
@@ -53,10 +61,6 @@ function geocode () {
         if (status === google.maps.GeocoderStatus.OK) {
           var dest = results[0].geometry.location;
           end = {lat: dest.lat(), lng: dest.lng()};
-
-          start = {lat:34.0410805, lng:-118.8915323};
-          end = {lat: 34.021144, lng:-118.8289902};
-          // successfully got start and end: populate UI
           $('#input-from').prop('disabled',true);
           $('#input-to').prop('disabled',true);
           $('#enter').css('display', 'none');
@@ -65,15 +69,20 @@ function geocode () {
           $('#right-panel').css('display', 'block');
           load();
         } else {
-          alert("Geocode was not successful for the following reason: " + status);
+          alert("Geocoding destination was not successful: " + status);
         }
       });
     } else {
-      alert("Geocode was not successful for the following reason: " + status);
+      alert("Geocoding source address was not successful: " + status);
     }
   });
 }
 
+
+/**
+ *  Loads both maps and calculates route coordinates, heading values,
+ *  and ramp speed markers.
+ */
 function load () {
   // calculate initial heading
   heading = calculateHeading(start, end);
@@ -128,10 +137,7 @@ function load () {
               var h = calculateHeading(routeCoordinates[rc_len - 2],
                                        routeCoordinates[rc_len - 1]);
               var prev_h = routeHeadings[routeHeadings.length - 1] || heading;
-              // console.log(Math.abs(h - prev_h));
-              if (Math.abs(h - prev_h) > 30 && Math.abs(h - prev_h) < 95) {
-                routeHeadings.push(h);
-              } else if (rc_len === 2) {
+              if (Math.abs(h - prev_h) > 40) {
                 routeHeadings.push(h);
               } else {
                 routeHeadings.push(prev_h);
@@ -142,23 +148,26 @@ function load () {
       }
       heading = routeHeadings[0];
       routeHeadings.push(routeHeadings[routeHeadings.length - 1]);
+
       // speed Markers
       var index = Math.floor(routeCoordinates.length / 7.0);
       for (var i = 1; i < 7; i++) {
         speedMarkers.push(i * index);
       }
-      speedMarkers = [25, 40, 50, 100, 125, 138]; // DELETE THIS!!!!!!!
-      routeCoordinates[47] = routeCoordinates[48]; // DELETE THIS!!!!!!!
-      // draw line
+      // draw route line on inset map
       directionsDisplay.setDirections(response);
     } else {
-      window.alert('Directions request failed due to ' + status);
+      window.alert('Route coordinates directions request failed: ' + status);
     }
   });
 
 }
 
 
+/**
+ *  @return
+ *    Heading angle (0 <= angle <= 360) between points c1 and c2.
+ */
 function calculateHeading (c1, c2) {
   var p1 = new google.maps.LatLng(c1.lat, c1.lng);
   var p2 = new google.maps.LatLng(c2.lat, c2.lng);
@@ -170,6 +179,9 @@ function calculateHeading (c1, c2) {
 }
 
 
+/**
+ *  Begins hyperlapse and inset map animations.
+ */
 function startAnimation () {
   // change play/pause routing
   $('#play-pause').get(0).setAttribute('onClick', 'pausePlayAnimation()');
@@ -182,10 +194,10 @@ function startAnimation () {
       map: map,
       icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
     });
-  } else { // (for reset)
+  } else { // (on reset)
     routeMarker.setPosition(start);
   }
-  // (for reset)
+  // (on reset)
   panorama.setPosition(routeCoordinates[0]);
   panorama.setPov({
     heading: routeHeadings[0],
@@ -196,6 +208,9 @@ function startAnimation () {
 };
 
 
+/**
+ *  Begins 360 panorama at start position.
+ */
 function initialPanorama () {
   var currHeading = heading;
   var stepSize = 0.4;
@@ -219,6 +234,10 @@ function initialPanorama () {
   }, 5);
 }
 
+
+/**
+ *  Begins hyperlapse playback.
+ */
 function advanceRoute() {
   var currIndex = -1;
   var routePlaying = true;
@@ -260,6 +279,7 @@ function advanceRoute() {
   }
   var advanceRouteInterval = setInterval(advance, speed);
 
+  // handle speed change during playback
   $('input[type=radio][name=speed]').change(function() {
     if (routePlaying) {
       setNewRouteSpeed(speed);
@@ -268,6 +288,10 @@ function advanceRoute() {
 
 }
 
+
+/**
+ *  Begins 360 panoroma at destination.
+ */
 function finalPanorama () {
   var finalHeading = routeHeadings[routeHeadings.length - 1];
   var currHeading = finalHeading;
@@ -296,6 +320,9 @@ function finalPanorama () {
 }
 
 
+/**
+ *  Handles play/pause button event.
+ */
 function pausePlayAnimation () {
   isPaused = !isPaused;
   if (isPaused) {
@@ -304,4 +331,3 @@ function pausePlayAnimation () {
     $('#play-pause span').text('Pause');
   }
 }
-
